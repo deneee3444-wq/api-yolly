@@ -759,22 +759,3 @@ def delete_account(email):
 # ═══════════════════════════════════════════════════════════════════════════════
 # STARTUP
 # ═══════════════════════════════════════════════════════════════════════════════
-
-if __name__ == '__main__':
-    import time
-    max_wait = 300
-    start = time.time()
-    while time.time() - start < max_wait:
-        try:
-            db.init_db()
-            resume_incomplete_tasks()
-            print("[STARTUP] DB initialized successfully.")
-            break
-        except Exception as e:
-            elapsed = int(time.time() - start)
-            print(f"[STARTUP] DB not ready yet ({elapsed}s elapsed), retrying in 5s... {e}")
-            time.sleep(5)
-    else:
-        print("[STARTUP] WARNING: Could not initialize DB within timeout!")
-    
-    app.run(host='127.0.0.1', port=5000, debug=False)
