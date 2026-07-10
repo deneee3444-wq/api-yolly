@@ -1,0 +1,7 @@
+flask
+flask-cors
+gunicorn
+requests
+Pillow
+psycopg2-binary
+bs4
