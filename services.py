@@ -141,40 +141,56 @@ def get_video_params(frontend_model):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SPAMOK EMAIL
+# OD2.IN TEMP EMAIL
 # ══════════════════════════════════════════════════════════════════════════════
 
 class eTemp:
-    def random_email(self, length):
-        return ''.join(
-            random.SystemRandom().choice(string.ascii_lowercase + string.digits)
-            for _ in range(length)
-        )
+    def random_box(self, length=10):
+        chars = string.ascii_lowercase + string.digits
+        return "".join(random.choice(chars) for _ in range(length))
 
     def getEmail(self):
-        return self.random_email(15) + '@spamok.com'
+        box = self.random_box(15)
+        return f"{box}@tm.od2.in"
 
     def getVerificationCode(self, mail, timeout=30):
-        """Spamok üzerinden gelen 6 haneli doğrulama kodunu çeker."""
-        address = mail.replace('@spamok.com', '')
+        """od2.in üzerinden gelen 6 haneli doğrulama kodunu çeker."""
+        box = mail.split('@')[0]
+        
         for _ in range(timeout):
             try:
-                r = requests.get(f'https://api.spamok.com/v2/EmailBox/{address}', timeout=10)
+                url = "https://od2.in/api/get-email"
+                params = {"id": box}
+                headers = {
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    "accept": "*/*",
+                    "referer": f"https://od2.in/temp-mail?id={box}",
+                }
+                
+                r = requests.get(url, params=params, headers=headers, timeout=10)
                 if r.status_code == 200:
-                    data = r.json()
-                    for m in data.get('mails', []):
-                        if 'Verification Code' in m.get('subject', '') or 'yolly.ai' in m.get('fromDomain', ''):
-                            mail_id = m['id']
-                            email_r = requests.get(f'https://api.spamok.com/v2/Email/{address}/{mail_id}', timeout=10)
-                            if email_r.status_code == 200:
-                                plain_text = email_r.json().get('messagePlain', '')
-                                match = re.search(r'\b\d{6}\b', plain_text)
-                                if match:
-                                    return match.group(0)
-            except Exception:
-                pass
+                    inbox = r.json()
+                    if inbox and isinstance(inbox, list) and len(inbox) > 0:
+                        mail_id = inbox[0]["_id"]
+                        
+                        r_msg = requests.get(url, params={"emailId": mail_id}, headers=headers, timeout=10)
+                        if r_msg.status_code == 200:
+                            msg = r_msg.json()
+                            
+                            subject = (msg.get("subject") or "").lower()
+                            from_text = (msg.get("from", {}).get("text") or "").lower()
+                            text = (msg.get("text") or "") + "\n" + (msg.get("html") or "")
+                            
+                            if "yolly" in subject or "yolly" in from_text or "verification" in subject or "code" in subject or "yolly" in text.lower():
+                                otp = re.search(r"\b(\d{6})\b", text)
+                                if otp:
+                                    return otp.group(1)
+            except Exception as e:
+                print(f"[-] od2.in API hatası: {e}")
+                
             time.sleep(2)
         return None
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -673,10 +689,10 @@ def create_and_login_new_account(max_attempts=30):
                 print("[-] Send-code başarısız oldu.")
                 continue
 
-            # 2) Doğrulama kodu al (Spamok)
+            # 2) Doğrulama kodu al (od2.in)
             code = None
             for attempt in range(1, 4):
-                print(f"[*] Spamok kutusu kontrol ediliyor ({email})...")
+                print(f"[*] od2.in kutusu kontrol ediliyor ({email})...")
                 time.sleep(15)
                 code = temp.getVerificationCode(email, timeout=15)
                 if code:
