@@ -356,6 +356,18 @@ def get_available_models(mode=None):
         return models.get(mode, [])
     return models
 
+def make_proxy_url(raw_url):
+    """
+    Wraps a direct media URL with the local /api/proxy endpoint.
+    """
+    if not raw_url or not isinstance(raw_url, str):
+        return raw_url
+    if raw_url.startswith("/api/proxy"):
+        return raw_url
+    import urllib.parse
+    return f"/api/proxy?url={urllib.parse.quote(raw_url, safe='')}"
+
+
 # ==============================================================================
 # MYEDIT ONLINE ALTYAPI VE KRIPTOGRAFİK YARDIMCILAR (SINGLE FILE)
 # ==============================================================================
@@ -1078,7 +1090,7 @@ def generate_ai_image_service(
             uploaded_sources_list.append(idx + 1)
 
         if task_id and uploaded_reference_urls:
-            db.update_task_reference_urls(task_id, uploaded_reference_urls)
+            db.update_task_reference_urls(task_id, [make_proxy_url(u) for u in uploaded_reference_urls])
 
     sources_str = json.dumps(uploaded_sources_list)
 
@@ -1440,7 +1452,7 @@ def generate_ai_video_service(
                 resp_upload = requests.put(upload_url, data=file_data, headers={'Content-Type': content_type})
 
         if task_id and uploaded_reference_urls:
-            db.update_task_reference_urls(task_id, uploaded_reference_urls)
+            db.update_task_reference_urls(task_id, [make_proxy_url(u) for u in uploaded_reference_urls])
 
     req_ts_ms = int(time.time() * 1000)
     enc_token_hex = encrypt_myedit_aes_gcm_hex(aes_key, raw_session_token, req_ts_ms, s_id_int)
@@ -2046,7 +2058,7 @@ def process_image_task(task_id, params, api_key_id):
             db.update_task_token(task_id, json.dumps(token_data_dict))
 
             if completed_files:
-                db.update_task_status(task_id, 'completed', completed_files[0])
+                db.update_task_status(task_id, 'completed', make_proxy_url(completed_files[0]))
                 deduct_api_key_quota(api_key_id, task_id)
                 post_credits_info = get_member_remaining_credits(current_token)
                 post_credits = post_credits_info.get("total_remain", "?") if post_credits_info else "?"
@@ -2226,10 +2238,10 @@ def process_video_task(task_id, params, api_key_id):
             db.update_task_token(task_id, json.dumps(token_data_dict))
 
             if video_file:
-                db.update_task_status(task_id, 'completed', video_file)
+                db.update_task_status(task_id, 'completed', make_proxy_url(video_file))
                 deduct_api_key_quota(api_key_id, task_id)
             else:
-                db.update_task_status(task_id, 'completed', completed_files[0] if completed_files else "")
+                db.update_task_status(task_id, 'completed', make_proxy_url(completed_files[0]) if completed_files else "")
                 deduct_api_key_quota(api_key_id, task_id)
             post_credits_info = get_member_remaining_credits(current_token)
             post_credits = post_credits_info.get("total_remain", "?") if post_credits_info else "?"
@@ -2372,12 +2384,13 @@ def proxy_request(url, range_header=None):
         cursor = conn.cursor()
         task_row = None
         try:
-            # We look for url_path in result_url or reference_image_urls
+            # We look for url_path in result_url or reference_image_urls (raw or url-encoded)
             query_val = f"%{url_path}%"
+            query_val_enc = f"%{urlparse.quote(url_path, safe='')}%"
             if db.DB_TYPE == 'postgresql':
-                cursor.execute('SELECT token FROM tasks WHERE result_url LIKE %s OR reference_image_urls LIKE %s', (query_val, query_val))
+                cursor.execute('SELECT token FROM tasks WHERE result_url LIKE %s OR result_url LIKE %s OR reference_image_urls LIKE %s OR reference_image_urls LIKE %s', (query_val, query_val_enc, query_val, query_val_enc))
             else:
-                cursor.execute('SELECT token FROM tasks WHERE result_url LIKE ? OR reference_image_urls LIKE ?', (query_val, query_val))
+                cursor.execute('SELECT token FROM tasks WHERE result_url LIKE ? OR result_url LIKE ? OR reference_image_urls LIKE ? OR reference_image_urls LIKE ?', (query_val, query_val_enc, query_val, query_val_enc))
             row = cursor.fetchone()
             if row:
                 if isinstance(row, dict):
