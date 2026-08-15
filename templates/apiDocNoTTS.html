@@ -570,6 +570,15 @@
                 <div class="endpoint">
                     <code>http://127.0.0.1:5000</code>
                 </div>
+                <p>All API endpoints and media URLs are accessed relative to your Base URL.</p>
+
+                <div class="alert info">
+                    <strong>📌 Important: Base URL Prefix &amp; Download Expiration</strong>
+                    <ul>
+                        <li><strong>Prepend Base URL:</strong> Generated media URLs (<code>result_url</code>) and reference images (<code>reference_image_urls</code>) are returned as proxy paths (e.g. <code>/api/proxy?url=...</code>). To download or view the file, always prepend your Base URL (e.g. <code>http://127.0.0.1:5000/api/proxy?url=...</code>).</li>
+                        <li>⏳ <strong>1-Hour Download Window:</strong> Generated media files are available for download for <strong>1 hour</strong>. Please download and save files to your own storage before the link expires.</li>
+                    </ul>
+                </div>
             </section>
 
             <!-- Quota -->
@@ -1233,6 +1242,14 @@ print(resp.json())</code></pre>
                     </div>
                 </div>
 
+                <div class="alert info">
+                    <strong>📌 Result URL &amp; File Expiration:</strong>
+                    <ul>
+                        <li><code>result_url</code> and <code>reference_image_urls</code> are returned as relative proxy endpoints starting with <code>/api/proxy?url=...</code>. Prepend your <strong>Base URL</strong> (e.g. <code>http://127.0.0.1:5000/api/proxy?url=...</code>) to access the file directly.</li>
+                        <li>⏳ <strong>1-Hour Download Window:</strong> Generated images and videos are available for download for <strong>1 hour</strong> from creation. Ensure your application downloads and saves them locally within this period.</li>
+                    </ul>
+                </div>
+
                 <div class="response-box">
                     <div class="response-box-header">
                         <h4>Response Examples</h4>
@@ -1242,13 +1259,13 @@ print(resp.json())</code></pre>
   <span class="code-key">"task_id"</span>: <span class="code-string">"abc123-def456-ghi789"</span>,
   <span class="code-key">"mode"</span>: <span class="code-string">"image"</span>,
   <span class="code-key">"status"</span>: <span class="code-string">"completed"</span>,
-  <span class="code-key">"result_url"</span>: <span class="code-string">"https://cdn.example.com/output.jpg"</span>,
+  <span class="code-key">"result_url"</span>: <span class="code-string">"/api/proxy?url=https%3A%2F%2Fstorage.example.com%2Foutput.jpg"</span>,
   <span class="code-key">"prompt"</span>: <span class="code-string">"a futuristic city with neon lights"</span>,
   <span class="code-key">"model"</span>: <span class="code-string">"NANO_BANANA_PRO"</span>,
   <span class="code-key">"size"</span>: <span class="code-string">"16:9"</span>,
   <span class="code-key">"resolution"</span>: <span class="code-string">"2K"</span>,
   <span class="code-key">"reference_image_urls"</span>: [
-    <span class="code-string">"https://cdn.example.com/reference.jpg"</span>
+    <span class="code-string">"/api/proxy?url=https%3A%2F%2Fstorage.example.com%2Freference.jpg"</span>
   ],
   <span class="code-key">"logs"</span>: [
     {<span class="code-key">"time"</span>: <span class="code-string">"2026-03-07 10:00:01"</span>, <span class="code-key">"message"</span>: <span class="code-string">"API Task ID: 21150821"</span>}
@@ -1334,7 +1351,7 @@ print(resp.json())</code></pre>
       <span class="code-key">"task_id"</span>: <span class="code-string">"abc123-def456-ghi789"</span>,
       <span class="code-key">"mode"</span>: <span class="code-string">"image"</span>,
       <span class="code-key">"status"</span>: <span class="code-string">"completed"</span>,
-      <span class="code-key">"result_url"</span>: <span class="code-string">"https://cdn.example.com/output.jpg"</span>,
+      <span class="code-key">"result_url"</span>: <span class="code-string">"/api/proxy?url=https%3A%2F%2Fstorage.example.com%2Foutput.jpg"</span>,
       <span class="code-key">"created_at"</span>: <span class="code-string">"2026-03-07T10:00:00"</span>
     },
     {
@@ -1470,6 +1487,8 @@ print(resp.json())</code></pre>
                         <li>Poll task status every 5–10 seconds for video tasks</li>
                         <li>Image generation takes approximately 30–120 seconds</li>
                         <li>Video generation takes approximately 60–300 seconds</li>
+                        <li><strong>Prepend Base URL:</strong> Always prepend your Base URL to returned <code>result_url</code> and reference image URLs to download or display media.</li>
+                        <li>⏳ <strong>1-Hour Expiration:</strong> Download and persist generated media within <strong>1 hour</strong> before links expire.</li>
                         <li><strong>Always check quota</strong> before submitting multiple tasks</li>
                         <li>Store task IDs for later retrieval</li>
                     </ul>
