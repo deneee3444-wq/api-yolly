@@ -296,8 +296,8 @@ AVAILABLE_MODELS = {
     "video": [
         {
             "id": "VEO_3_1",
-            "name": "Veo 3.1 Lite",
-            "description": "Veo 3.1 Lite by Google - Supports Start/End Frame",
+            "name": "Veo 3.1",
+            "description": "Veo 3.1 - Supports Start/End Frame",
             "supports_start_frame": True,
             "supports_end_frame": True,
             "supports_reference_images": False,
@@ -313,17 +313,17 @@ AVAILABLE_MODELS = {
         {
             "id": "GROK_VIDEO",
             "name": "Grok Video",
-            "description": "Grok Video (Veo 3.1 Lite) - Supports Start/End Frame",
+            "description": "Grok Video - Supports Start/End Frame",
             "supports_start_frame": True,
             "supports_end_frame": True,
             "supports_reference_images": False,
             "max_reference_images": 0,
             "supported_sizes": ["16:9", "9:16"],
-            "supported_durations": [4, 6, 8],
-            "supported_resolutions": ["720p", "1080p"],
+            "supported_durations": [8],
+            "supported_resolutions": ["720p"],
             "default_size": "16:9",
-            "default_resolution": "1080p",
-            "default_duration": 4,
+            "default_resolution": "720p",
+            "default_duration": 8,
             "max_prompt_length": 4000
         }
     ],
