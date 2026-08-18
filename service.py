@@ -185,7 +185,7 @@ VIDEO_MODELS_CONFIG = {
         "name": "Sora 2 Standard",
         "model": "sora-2",
         "vendor": "OpenAI",
-        "supported_modes": ["TextToVideo", "ImageToVideo"],
+        "supported_modes": ["ImageToVideo"],
         "supported_frame_modes": ["single"],
         "supported_resolutions": ["720p"],
         "supported_aspect_ratios": ["16:9", "9:16"],
@@ -403,7 +403,10 @@ AVAILABLE_MODELS = {
             "default_resolution": "720p",
             "default_duration": 8,
             "max_prompt_length": 2000,
-            "credit": 50
+            "credit": 50,
+            "supported_modes": ["ImageToVideo"],
+            "supported_frame_modes": ["single"],
+            "requires_start_frame": True
         },
         {
             "id": "seedance_2_0_mini",
@@ -2273,11 +2276,13 @@ def process_video_task(task_id, params, api_key_id):
         db.update_task_status(task_id, 'running')
 
         prompt = params.get('prompt', '')
-        raw_model = params.get('model', 'sora_2_std')
+        has_start_frame = bool(params.get('start_frame'))
+        default_model = 'sora_2_std' if has_start_frame else 'seedance_2_0_mini'
+        raw_model = params.get('model') or default_model
         model = VIDEO_MODEL_MAPPING.get(raw_model, raw_model)
         aspect_ratio = params.get('size', '16:9')
         resolution = params.get('resolution', '720p')
-        duration = int(params.get('duration', 8))
+        duration = int(params.get('duration', 8 if model == 'sora_2_std' else 10))
         sound = params.get('sound', 'vendor')
 
         # Determine API quota to deduct for video model
