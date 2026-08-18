@@ -2166,9 +2166,10 @@
                 const i2vSelect = document.getElementById('i2vModel');
 
                 if (t2vSelect) {
+                    const t2vModels = videoModels.filter(m => !m.supported_modes || m.supported_modes.includes('TextToVideo'));
                     const prevVal = t2vSelect.value;
-                    t2vSelect.innerHTML = videoModels.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-                    if (videoModels.some(m => m.id === prevVal)) {
+                    t2vSelect.innerHTML = t2vModels.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+                    if (t2vModels.some(m => m.id === prevVal)) {
                         t2vSelect.value = prevVal;
                     }
                     onT2vModelChange();
