@@ -115,7 +115,7 @@ IMAGE_MODELS_CONFIG = {
         "vendor": "Google",
         "actionId_prefix": "genimage_1_img_google_gemini3.1flash",
         "promptLength": 2500,
-        "ref_img_limit": 14,
+        "ref_img_limit": 5,
         "supported_resolutions": ["1K", "2K", "4K"],
         "supported_aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
         "credits": {
@@ -129,7 +129,7 @@ IMAGE_MODELS_CONFIG = {
         "vendor": "Google",
         "actionId_prefix": "genimage_1_img_google_gemini3pro",
         "promptLength": 2500,
-        "ref_img_limit": 14,
+        "ref_img_limit": 5,
         "supported_resolutions": ["1K", "2K", "4K"],
         "supported_aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
         "credits": {
@@ -143,7 +143,7 @@ IMAGE_MODELS_CONFIG = {
         "vendor": "OpenAI",
         "actionId_prefix": "genimage_1_img_openai_gptimage2",
         "promptLength": 8000,
-        "ref_img_limit": 16,
+        "ref_img_limit": 5,
         "supported_resolutions": ["1K", "2K"],
         "supported_aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
         "credits": {
@@ -181,57 +181,154 @@ IMAGE_MODELS_CONFIG["GPT_IMAGE_2"] = IMAGE_MODELS_CONFIG["gpt_image_2"]
 # VIDEO MODEL CONFIGURATIONS
 # ==============================================================================
 VIDEO_MODELS_CONFIG = {
-    "veo_3_1_lite": {
-        "name": "Veo 3.1 Lite",
-        "model": "veo-3.1-lite-generate-001",
-        "vendor": "Google",
+    "sora_2_std": {
+        "name": "Sora 2 Standard",
+        "model": "sora-2",
+        "vendor": "OpenAI",
         "supported_modes": ["TextToVideo", "ImageToVideo"],
-        "supported_frame_modes": ["single", "startend"],
-        "supported_resolutions": ["1080p"],
+        "supported_frame_modes": ["single"],
+        "supported_resolutions": ["720p"],
         "supported_aspect_ratios": ["16:9", "9:16"],
-        "supported_durations": [4, 6, 8],
+        "supported_durations": [8],
+        "action_id": "genvideo_1_sec_openai_sora2_{sound}_720p",
+        "action_id_i2v": "genvideo_1_sec_openai_custom_sora2std_{sound}_{frame_mode}",
+        "credit_map": {
+            ("none", "720p"): 6,
+            ("vendor", "720p"): 6,
+        },
+        "credit": 6,
+        "mode": "std",
+        "default_sound": "vendor",
+    },
+    "seedance_2_0_mini": {
+        "name": "Seedance 2.0 Mini",
+        "model": "dreamina-seedance-2-0-mini-260615",
+        "vendor": "BytePlus",
+        "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
+        "supported_frame_modes": ["single", "startend"],
+        "supported_resolutions": ["720p"],
+        "supported_aspect_ratios": ["16:9", "9:16", "1:1"],
+        "supported_durations": [10],
         "supported_resolutions_by_mode": {
-            "ImageToVideo": ["1080p"],
-            "TextToVideo": ["720p", "1080p"],
+            "ImageToVideo": ["720p"],
+            "TextToVideo": ["720p"],
+            "ReferenceToVideo": ["720p"],
         },
         "supported_durations_by_mode": {
-            "ImageToVideo": [4, 6, 8],
-            "TextToVideo": [4, 8],
+            "ImageToVideo": [10],
+            "TextToVideo": [10],
+            "ReferenceToVideo": [10],
         },
-        "action_id": "genvideo_1_sec_google_veo3.1lite_{sound}_{resolution}",
-        "action_id_i2v": "genvideo_1_sec_google_custom_veo3.1lite_{sound}_{frame_mode}_{resolution}",
+        "action_id": "genvideo_1_sec_bytedance_seedance2.0mini_{sound}_{resolution}",
+        "action_id_i2v": "genvideo_1_sec_bytedance_custom_seedance2.0mini_{sound}_{frame_mode}_{resolution}",
         "credit_map": {
-            ("ImageToVideo", "none", "720p"): 3,
-            ("ImageToVideo", "none", "1080p"): 5,
-            ("ImageToVideo", "vendor", "720p"): 3,
-            ("ImageToVideo", "vendor", "1080p"): 5,
-            ("TextToVideo", "none", "720p"): 2,
-            ("TextToVideo", "none", "1080p"): 3,
-            ("TextToVideo", "vendor", "720p"): 3,
-            ("TextToVideo", "vendor", "1080p"): 5,
-            ("none", "720p"): 2,
-            ("none", "1080p"): 3,
-            ("vendor", "720p"): 3,
-            ("vendor", "1080p"): 5,
+            ("none", "720p"): 4,
+            ("vendor", "720p"): 4,
         },
-        "credit": 3,
+        "credit": 2,
+        "mode": "mini",
+        "reference_media_limit": {
+            "supported_types": ["image"],
+            "max_images": 5,
+            "max_videos": 0,
+            "max_total": 5,
+        },
+    },
+    "gemini_omni_flash": {
+        "name": "Gemini Omni Flash",
+        "model": "gemini-omni-flash-preview",
+        "vendor": "Google",
+        "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
+        "supported_frame_modes": ["single"],
+        "supported_resolutions": ["720p"],
+        "supported_aspect_ratios": ["16:9", "9:16"],
+        "supported_durations": [10],
+        "action_id": "genvideo_1_sec_google_geminiomniflash_{sound}_{resolution}",
+        "action_id_i2v": "genvideo_1_sec_google_custom_geminiomniflash_{sound}_{frame_mode}_{resolution}",
+        "credit_map": {
+            ("none", "720p"): 5,
+            ("vendor", "720p"): 5,
+        },
+        "credit": 5,
         "mode": "std",
-    }
+        "default_sound": "vendor",
+        "reference_media_limit": {
+            "supported_types": ["image"],
+            "max_images": 5,
+            "max_videos": 0,
+            "max_total": 5,
+        },
+    },
+    "kling_o3": {
+        "name": "Kling O3",
+        "model": "kling-v3-omni",
+        "vendor": "Kling",
+        "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
+        "supported_frame_modes": ["single", "startend"],
+        "supported_resolutions": ["720p"],
+        "supported_aspect_ratios": ["16:9", "9:16", "1:1"],
+        "supported_durations": [10],
+        "supported_resolutions_by_mode": {
+            "ImageToVideo": ["720p"],
+            "TextToVideo": ["720p"],
+            "ReferenceToVideo": ["720p"],
+        },
+        "supported_durations_by_mode": {
+            "ImageToVideo": [10],
+            "TextToVideo": [10],
+            "ReferenceToVideo": [10],
+        },
+        "action_id": "genvideo_1_sec_kling_o3std_{sound}_720p",
+        "action_id_overrides": {
+            "720p": "genvideo_1_sec_kling_o3std_{sound}_720p",
+        },
+        "action_id_i2v_overrides": {
+            "720p": "genvideo_1_sec_kling_custom_o3std_{sound}_{frame_mode}_720p",
+        },
+        "credit_map": {
+            ("none", "720p"): 4,
+            ("vendor", "720p"): 5,
+        },
+        "credit": 5,
+        "mode": "std",
+        "reference_media_limit": {
+            "supported_types": ["image"],
+            "max_images": 5,
+            "max_videos": 0,
+            "max_total": 5,
+        },
+    },
 }
 
 # Video Model ID Mapping (Frontend / API ID -> Backend Model ID)
 VIDEO_MODEL_MAPPING = {
-    "VEO_3_1": "veo_3_1_lite",
-    "GROK_VIDEO": "veo_3_1_lite",
-    # Fallback / case-insensitive aliases
-    "veo_3_1_lite": "veo_3_1_lite",
-    "veo_3_1": "veo_3_1_lite",
-    "grok_video": "veo_3_1_lite",
+    "sora_2_std": "sora_2_std",
+    "SORA_2_STD": "sora_2_std",
+    "SORA_2": "sora_2_std",
+    "sora_2": "sora_2_std",
+    "sora-2": "sora_2_std",
+    "seedance_2_0_mini": "seedance_2_0_mini",
+    "SEEDANCE_2_0_MINI": "seedance_2_0_mini",
+    "SEEDANCE_MINI": "seedance_2_0_mini",
+    "seedance_mini": "seedance_2_0_mini",
+    "seedance": "seedance_2_0_mini",
+    "gemini_omni_flash": "gemini_omni_flash",
+    "GEMINI_OMNI_FLASH": "gemini_omni_flash",
+    "gemini_omni": "gemini_omni_flash",
+    "GEMINI_OMNI": "gemini_omni_flash",
+    "kling_o3": "kling_o3",
+    "KLING_O3": "kling_o3",
+    "kling3": "kling_o3",
+    "kling_3": "kling_o3",
 }
 
 # Direct mapping in VIDEO_MODELS_CONFIG for safety
-VIDEO_MODELS_CONFIG["VEO_3_1"] = VIDEO_MODELS_CONFIG["veo_3_1_lite"]
-VIDEO_MODELS_CONFIG["GROK_VIDEO"] = VIDEO_MODELS_CONFIG["veo_3_1_lite"]
+VIDEO_MODELS_CONFIG["SORA_2_STD"] = VIDEO_MODELS_CONFIG["sora_2_std"]
+VIDEO_MODELS_CONFIG["SORA_2"] = VIDEO_MODELS_CONFIG["sora_2_std"]
+VIDEO_MODELS_CONFIG["SEEDANCE_2_0_MINI"] = VIDEO_MODELS_CONFIG["seedance_2_0_mini"]
+VIDEO_MODELS_CONFIG["SEEDANCE_MINI"] = VIDEO_MODELS_CONFIG["seedance_2_0_mini"]
+VIDEO_MODELS_CONFIG["GEMINI_OMNI_FLASH"] = VIDEO_MODELS_CONFIG["gemini_omni_flash"]
+VIDEO_MODELS_CONFIG["KLING_O3"] = VIDEO_MODELS_CONFIG["kling_o3"]
 
 MODELS = {} # Compatibility mapping
 
@@ -247,68 +344,56 @@ AVAILABLE_MODELS = {
             "supported_resolutions": ["1K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 2500
+            "max_prompt_length": 2500,
+            "credit": 15
         },
         {
             "id": "NANO_BANANA_2",
             "name": "Nano Banana 2",
-            "description": "Nano Banana 2 by Google - Supports up to 14 Reference Images",
+            "description": "Nano Banana 2 by Google - Supports up to 5 Reference Images",
             "supports_reference_images": True,
             "max_reference_images": 5,
             "supported_sizes": ["1:1", "16:9", "9:16", "4:3", "3:4"],
             "supported_resolutions": ["1K", "2K", "4K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 2500
+            "max_prompt_length": 2500,
+            "credit": 15
         },
         {
             "id": "NANO_BANANA_PRO",
             "name": "Nano Banana Pro",
-            "description": "Nano Banana Pro by Google - Supports up to 14 Reference Images",
+            "description": "Nano Banana Pro by Google - Supports up to 5 Reference Images",
             "supports_reference_images": True,
             "max_reference_images": 5,
             "supported_sizes": ["1:1", "16:9", "9:16", "4:3", "3:4"],
             "supported_resolutions": ["1K", "2K", "4K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 2500
+            "max_prompt_length": 2500,
+            "credit": 15
         },
         {
             "id": "GPT_IMAGE_2",
             "name": "GPT-Image-2",
-            "description": "GPT-Image-2 by OpenAI - Supports up to 16 Reference Images",
+            "description": "GPT-Image-2 by OpenAI - Supports up to 5 Reference Images",
             "supports_reference_images": True,
             "max_reference_images": 5,
             "supported_sizes": ["1:1", "16:9", "9:16", "4:3", "3:4"],
             "supported_resolutions": ["1K", "2K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 8000
+            "max_prompt_length": 8000,
+            "credit": 15
         }
     ],
     "video": [
         {
-            "id": "VEO_3_1",
-            "name": "Veo 3.1",
-            "description": "Veo 3.1 - Supports Start/End Frame",
+            "id": "sora_2_std",
+            "name": "Sora 2 Standard",
+            "description": "Sora 2 Standard by OpenAI - Supports Start Frame",
             "supports_start_frame": True,
-            "supports_end_frame": True,
-            "supports_reference_images": False,
-            "max_reference_images": 0,
-            "supported_sizes": ["16:9", "9:16"],
-            "supported_durations": [4, 6, 8],
-            "supported_resolutions": ["720p", "1080p"],
-            "default_size": "16:9",
-            "default_resolution": "1080p",
-            "default_duration": 4,
-            "max_prompt_length": 4000
-        },
-        {
-            "id": "GROK_VIDEO",
-            "name": "Grok Video",
-            "description": "Grok Video - Supports Start/End Frame",
-            "supports_start_frame": True,
-            "supports_end_frame": True,
+            "supports_end_frame": False,
             "supports_reference_images": False,
             "max_reference_images": 0,
             "supported_sizes": ["16:9", "9:16"],
@@ -317,7 +402,59 @@ AVAILABLE_MODELS = {
             "default_size": "16:9",
             "default_resolution": "720p",
             "default_duration": 8,
-            "max_prompt_length": 4000
+            "max_prompt_length": 2000,
+            "credit": 50
+        },
+        {
+            "id": "seedance_2_0_mini",
+            "name": "Seedance 2.0 Mini",
+            "description": "Seedance 2.0 Mini by BytePlus - Supports Start/End Frame, up to 5 Reference Images",
+            "supports_start_frame": True,
+            "supports_end_frame": True,
+            "supports_reference_images": True,
+            "max_reference_images": 5,
+            "supported_sizes": ["16:9", "9:16", "1:1"],
+            "supported_durations": [10],
+            "supported_resolutions": ["720p"],
+            "default_size": "16:9",
+            "default_resolution": "720p",
+            "default_duration": 10,
+            "max_prompt_length": 4900,
+            "credit": 50
+        },
+        {
+            "id": "gemini_omni_flash",
+            "name": "Gemini Omni Flash",
+            "description": "Gemini Omni Flash by Google - Supports Start Frame, up to 5 Reference Images",
+            "supports_start_frame": True,
+            "supports_end_frame": False,
+            "supports_reference_images": True,
+            "max_reference_images": 5,
+            "supported_sizes": ["16:9", "9:16"],
+            "supported_durations": [10],
+            "supported_resolutions": ["720p"],
+            "default_size": "16:9",
+            "default_resolution": "720p",
+            "default_duration": 10,
+            "max_prompt_length": 3500,
+            "credit": 55
+        },
+        {
+            "id": "kling_o3",
+            "name": "Kling O3",
+            "description": "Kling O3 by Kling - Supports Start/End Frame, up to 5 Reference Images",
+            "supports_start_frame": True,
+            "supports_end_frame": True,
+            "supports_reference_images": True,
+            "max_reference_images": 5,
+            "supported_sizes": ["16:9", "9:16", "1:1"],
+            "supported_durations": [10],
+            "supported_resolutions": ["720p"],
+            "default_size": "16:9",
+            "default_resolution": "720p",
+            "default_duration": 10,
+            "max_prompt_length": 2500,
+            "credit": 55
         }
     ],
     "tts": [],
@@ -1234,10 +1371,10 @@ def generate_ai_image_service(
 def generate_ai_video_service(
     member_token: str,
     user_prompt: str = "a cute astronaut cat floating in space station, cinematic lighting",
-    model_key: str = "VEO_3_1",
+    model_key: str = "sora_2_std",
     aspect_ratio: str = "16:9",
-    resolution: str = "1080p",
-    processing_duration: int = 4,
+    resolution: str = "720p",
+    processing_duration: int = 8,
     sound: str = "none",
     effect_mode: str = "TextToVideo",
     source_image_path: str = None,
@@ -1249,7 +1386,7 @@ def generate_ai_video_service(
     task_id: str = None,
 ):
     actual_model_key = VIDEO_MODEL_MAPPING.get(model_key, model_key)
-    model_data = VIDEO_MODELS_CONFIG.get(actual_model_key, VIDEO_MODELS_CONFIG.get("veo_3_1_lite"))
+    model_data = VIDEO_MODELS_CONFIG.get(actual_model_key, VIDEO_MODELS_CONFIG.get("sora_2_std"))
     if isinstance(model_data["model"], dict):
         model_name_str = model_data["model"].get(effect_mode, list(model_data["model"].values())[0])
     else:
@@ -2100,11 +2237,11 @@ def process_video_task(task_id, params, api_key_id):
         db.update_task_status(task_id, 'running')
 
         prompt = params.get('prompt', '')
-        raw_model = params.get('model', 'VEO_3_1')
+        raw_model = params.get('model', 'sora_2_std')
         model = VIDEO_MODEL_MAPPING.get(raw_model, raw_model)
         aspect_ratio = params.get('size', '16:9')
-        resolution = params.get('resolution', '1080p')
-        duration = int(params.get('duration', 4))
+        resolution = params.get('resolution', '720p')
+        duration = int(params.get('duration', 8))
         sound = params.get('sound', 'vendor')
 
         input_mode = "TextToVideo"
