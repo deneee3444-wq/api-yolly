@@ -182,7 +182,7 @@ IMAGE_MODELS_CONFIG["GPT_IMAGE_2"] = IMAGE_MODELS_CONFIG["gpt_image_2"]
 # ==============================================================================
 VIDEO_MODELS_CONFIG = {
     "sora_2_std": {
-        "name": "Sora 2 Standard",
+        "name": "Sora 2",
         "model": "sora-2",
         "vendor": "OpenAI",
         "supported_modes": ["ImageToVideo"],
@@ -201,7 +201,7 @@ VIDEO_MODELS_CONFIG = {
         "default_sound": "vendor",
     },
     "seedance_2_0_mini": {
-        "name": "Seedance 2.0 Mini",
+        "name": "Seedance 2.0",
         "model": "dreamina-seedance-2-0-mini-260615",
         "vendor": "BytePlus",
         "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
@@ -260,7 +260,7 @@ VIDEO_MODELS_CONFIG = {
         },
     },
     "kling_o3": {
-        "name": "Kling O3",
+        "name": "Kling 3.0",
         "model": "kling-v3-omni",
         "vendor": "Kling",
         "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
@@ -390,8 +390,8 @@ AVAILABLE_MODELS = {
     "video": [
         {
             "id": "sora_2_std",
-            "name": "Sora 2 Standard",
-            "description": "Sora 2 Standard by OpenAI - Supports Start Frame",
+            "name": "Sora 2",
+            "description": "Sora 2 by OpenAI - Supports Start Frame",
             "supports_start_frame": True,
             "supports_end_frame": False,
             "supports_reference_images": False,
@@ -410,8 +410,8 @@ AVAILABLE_MODELS = {
         },
         {
             "id": "seedance_2_0_mini",
-            "name": "Seedance 2.0 Mini",
-            "description": "Seedance 2.0 Mini by BytePlus - Supports Start/End Frame, up to 5 Reference Images",
+            "name": "Seedance 2.0",
+            "description": "Seedance 2.0 by BytePlus - Supports Start/End Frame, up to 5 Reference Images",
             "supports_start_frame": True,
             "supports_end_frame": True,
             "supports_reference_images": True,
@@ -423,7 +423,8 @@ AVAILABLE_MODELS = {
             "default_resolution": "720p",
             "default_duration": 10,
             "max_prompt_length": 4900,
-            "credit": 50
+            "credit": 50,
+            "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"]
         },
         {
             "id": "gemini_omni_flash",
@@ -440,12 +441,13 @@ AVAILABLE_MODELS = {
             "default_resolution": "720p",
             "default_duration": 10,
             "max_prompt_length": 3500,
-            "credit": 55
+            "credit": 55,
+            "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"]
         },
         {
             "id": "kling_o3",
-            "name": "Kling O3",
-            "description": "Kling O3 by Kling - Supports Start/End Frame, up to 5 Reference Images",
+            "name": "Kling 3.0",
+            "description": "Kling 3.0 by Kling - Supports Start/End Frame, up to 5 Reference Images",
             "supports_start_frame": True,
             "supports_end_frame": True,
             "supports_reference_images": True,
@@ -457,7 +459,8 @@ AVAILABLE_MODELS = {
             "default_resolution": "720p",
             "default_duration": 10,
             "max_prompt_length": 2500,
-            "credit": 55
+            "credit": 55,
+            "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"]
         }
     ],
     "tts": [],
