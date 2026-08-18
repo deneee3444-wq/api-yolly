@@ -8,6 +8,7 @@ import os
 import json
 import time
 import random
+import secrets
 import string
 import struct
 import re
@@ -33,6 +34,7 @@ atexit.register(lambda: _shutdown_event.set())
 # MYEDIT API ENDPOINT'LERI VE SABITLER
 # ==============================================================================
 INIT_URL = "https://cse.cyberlink.com/cse/v2/init"
+MEMBER_INIT_URL = "https://mauth.cyberlink.com/member-auth/v1/init"
 SIGNUP_URL = "https://mauth.cyberlink.com/member-auth/public/sign-up"
 LOGIN_URL = "https://mauth.cyberlink.com/member-auth/public/sign-in"
 TOKEN_EXCHANGE_URL = "https://cse.cyberlink.com/cse/v2/getCseTokenByMember"
@@ -71,15 +73,15 @@ HEADERS = {
 }
 
 MEMBER_AUTH_PUB_KEY = (
-    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs+UBoDNErzXk+r2WdgWegRnXe"
-    "DdI9oMbT1x69OPiPIonPHjcHdd0X9t3BWDuhs7VIXOGYnd7ZiacG7461673sDTJ2Ue98C"
-    "M1XyzawyQ+8HxzW1BQw+L/3tYWhhMVhdo3sGdftCuY9SCgbvj6EksI4I2SaViv3/pIejK"
-    "PxfDtesK5h2TgDmKerjmcvVO6IqPgbVPB0zMCL7hkhODhPb+CpTyh/8h7v4892tCyuC83"
-    "LChioIPE7fZ531ERlWK9r1ggwgMuuDSE/uuv6bWp9XpN7zwKU95KAxyBTlDE0AtTLrXC/"
-    "w5yCQjaZZE09wW7tM68PUQAIcARO4E9WaNoiEzDQQIDAQAB"
+    "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtUnkrBbgQQLnHdk8d7LsDtC/rkQa9rTe7"
+    "ZHwqf7jT1fqMGKFqa/4ESplrcyd6xmqt5m65v+IXBxhNFaqPZOrfMTxD5Kg1ZhlecfytcLR2Tuzg6"
+    "MXVnDBzTJgU46rIRyzuippauieeoQZGNghxfDeOOveihZBYNwIYl3zK4DXZckm/Ils5wn3ZFEdJja"
+    "ZEV4JFj6vOMDlORmRoCCZZ1xYvIbjSbXdRM9XsPuOK99ucwS750xycVB4qkAzrUvfJLiBw4rQgA7s"
+    "g44/iMAlt2X71yLP6zYVVzuHQDcvQiWDJfymZfooPPehRf0cW+amWW4qmNsfhQVvY7AVijCBuC3QMw"
+    "IDAQAB"
 )
 MEMBER_AUTH_IV = b"CLMemberAuth"
-MEMBER_AUTH_KEY_ID = 1
+MEMBER_AUTH_KEY_ID = 2
 
 MEMBER_HEADERS = {
     "Accept": "application/json, text/plain, */*",
@@ -87,15 +89,6 @@ MEMBER_HEADERS = {
     "Origin": "https://mauth.cyberlink.com",
     "Referer": "https://mauth.cyberlink.com/auth/myedit/signup?mode=myedit&isBusiness=false&lang=ENU",
     "User-Agent": HEADERS["User-Agent"],
-}
-
-_TEMP_MAIL_BASE = "https://smtp-backend.abhi.at/api"
-_TEMP_MAIL_HEADERS = {
-    "accept": "*/*",
-    "content-type": "application/json",
-    "origin": "https://temp-mail.abhi.at",
-    "referer": "https://temp-mail.abhi.at/",
-    "user-agent": HEADERS["User-Agent"],
 }
 
 
@@ -369,83 +362,99 @@ def make_proxy_url(raw_url):
 
 
 # ==============================================================================
-# MYEDIT ONLINE ALTYAPI VE KRIPTOGRAFİK YARDIMCILAR (SINGLE FILE)
+# MYEDIT ONLINE ALTYAPI VE KRIPTOGRAFİK YARDIMCILAR (od2.in)
 # ==============================================================================
 
 class TempMailClient:
+    """od2.in Temp Mail Entegrasyonu"""
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update(_TEMP_MAIL_HEADERS)
+        self.box = None
         self.email = None
         self._seen_ids = set()
 
-    def get_email(self) -> str:
-        username = "".join(random.choices(string.ascii_lowercase + string.digits, k=12))
-        r = self.session.post(
-            f"{_TEMP_MAIL_BASE}/mailboxes/custom",
-            json={"username": username},
-            timeout=15,
-        )
-        r.raise_for_status()
-        self.email = r.json()["address"]
+    def get_email(self, length: int = 10) -> str:
+        self.box = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(length))
+        self.email = f"{self.box}@tm.od2.in"
         print(f"[Temp Mail] Created: {self.email}")
         return self.email
+
+    def _get_json(self, url: str, params: dict):
+        return self.session.get(
+            url,
+            params=params,
+            headers={
+                "user-agent": HEADERS["User-Agent"],
+                "accept": "*/*",
+                "referer": f"https://od2.in/temp-mail?id={params.get('id', self.box if self.box else '')}",
+            },
+            timeout=30,
+        ).json()
 
     def wait_for_activation_link(self, timeout: int = 60) -> str:
         print("[Temp Mail] Gelen kutusu sorgulaniyor...")
         deadline = time.time() + timeout
-        url = f"{_TEMP_MAIL_BASE}/mailboxes/{quote(self.email, safe='')}/messages"
 
         while time.time() < deadline:
             try:
-                r = self.session.post(url, params={"_": int(time.time() * 1000)}, timeout=15)
-                r.raise_for_status()
-                inbox = r.json()
-            except requests.RequestException as e:
+                inbox = self._get_json("https://od2.in/api/get-email", {"id": self.box})
+            except Exception as e:
                 print(f"[!] Inbox hatasi: {e}")
                 time.sleep(2)
                 continue
 
-            for msg in inbox.get("messages", []):
-                mid = msg["id"]
-                if mid in self._seen_ids:
-                    continue
-                self._seen_ids.add(mid)
+            if inbox:
+                for item in inbox:
+                    msg_id = item.get("_id")
+                    if not msg_id or msg_id in self._seen_ids:
+                        continue
+                    self._seen_ids.add(msg_id)
 
-                print(f"[+] Yeni mail: {msg['subject']}  (from: {msg['from']})")
-                full_r = self.session.get(f"{_TEMP_MAIL_BASE}/messages/{mid}", timeout=15)
-                full_r.raise_for_status()
-                full = full_r.json()
+                    try:
+                        msg = self._get_json("https://od2.in/api/get-email", {"emailId": msg_id})
+                    except Exception as e:
+                        print(f"[!] Mesaj cekme hatasi: {e}")
+                        continue
 
-                parsed = full.get("parsedData") or {}
-                html = parsed.get("html", "") or ""
-                text = parsed.get("text", "") or ""
-                combined = f"{text} {html}"
+                    subject = msg.get("subject") or ""
+                    text = (msg.get("text") or "") + "\n" + (msg.get("html") or "")
+                    print(f"[+] Yeni mail: {subject}")
 
-                # Trace linklerinden aktivasyon linkini bul
-                trace_links = re.findall(r'https://membership\.cyberlink\.com/prog/event/autoedm/trace_mem\.jsp\?[^\s"\'<>]+', combined)
-                for link in trace_links:
-                    link = link.replace("&amp;", "&")
-                    if "account-activate" in link or "Activate" in link or "active-member" in link:
-                        print(f"  -> Aktivasyon linki bulundu: {link[:80]}...")
+                    # Trace linklerinden aktivasyon linkini bul
+                    trace_links = re.findall(r'https?://membership\.cyberlink\.com/prog/event/autoedm/trace_mem\.jsp\?[^\s"\'<>]+', text)
+                    for link in trace_links:
+                        link = link.replace("&amp;", "&")
+                        if "account-activate" in link or "Activate" in link or "active-member" in link:
+                            print(f"  -> Aktivasyon linki bulundu: {link[:80]}...")
+                            return link
+
+                    # Fallback: Herhangi bir trace linki
+                    if trace_links:
+                        link = trace_links[0].replace("&amp;", "&")
+                        print(f"  -> Link ayiklandi (fallback): {link[:80]}...")
                         return link
 
-                # Fallback: Herhangi bir trace linki
-                if trace_links:
-                    link = trace_links[0].replace("&amp;", "&")
-                    print(f"  -> Link ayiklandi (fallback): {link[:80]}...")
-                    return link
-
-            print(f"[.] Inbox bos, 2s sonra tekrar...")
             time.sleep(2)
 
         raise TimeoutError("Aktivasyon maili gelmedi!")
 
 # ================= MemberAuth Enkripsyon =================
 
+def get_member_auth_public_key():
+    """Sunucudan MemberAuth RSA Acik Anahtarini ve Key ID (k)'yi dinamik olarak alir."""
+    try:
+        resp = requests.post(MEMBER_INIT_URL, json={"p": "myedit"}, headers=MEMBER_HEADERS, timeout=10)
+        resp.raise_for_status()
+        data = resp.json().get("info", {})
+        return data["public_key"], data["id"]
+    except Exception as e:
+        print(f"[!] MemberAuth init hatasi: {e}, statik anahtar kullaniliyor.")
+        return MEMBER_AUTH_PUB_KEY, MEMBER_AUTH_KEY_ID
+
 def create_member_auth_payload(user_data: dict):
     """MemberAuth API icin RSA-OAEP + AES-256-GCM sifreli payload uretir."""
-    der_bytes = base64.b64decode(MEMBER_AUTH_PUB_KEY)
+    pub_key_b64, key_id = get_member_auth_public_key()
+    der_bytes = base64.b64decode(pub_key_b64)
     public_key = serialization.load_der_public_key(der_bytes)
 
     # 1. Rastgele 256-bit AES-GCM Anahtari uret
@@ -471,7 +480,7 @@ def create_member_auth_payload(user_data: dict):
     return {
         "a": a_param,
         "data": data_param,
-        "k": MEMBER_AUTH_KEY_ID,
+        "k": key_id,
     }, aes_key
 
 def decrypt_member_auth_response(response_b64: str, aes_key: bytes):
