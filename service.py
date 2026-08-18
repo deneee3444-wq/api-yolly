@@ -1985,86 +1985,98 @@ def get_or_create_active_account(api_key_id, task_id=None, force_new=False):
 
     return None, None
 
-def deduct_api_key_quota(api_key_id, task_id=None):
-    """Deducts 1 account/quota from the API key's available accounts upon successful task completion.
+def deduct_api_key_quota(api_key_id, task_id=None, amount=1):
+    """Deducts `amount` (e.g. 15 for images, 50/55 for videos) accounts/quotas from the API key's available accounts upon successful task completion.
     Prioritizes accounts other than the currently active working account so the active account remains intact in DB.
     Even if the active account's DB row is consumed, its in-memory session (ACTIVE_ACCOUNTS) stays fully operational.
     """
     try:
+        if amount is None or amount <= 0:
+            amount = 1
+
         active_acc = ACTIVE_ACCOUNTS.get(api_key_id)
         active_email = active_acc.get("email") if active_acc else None
 
         conn = db.get_connection()
         cursor = conn.cursor()
-        consumed_email = None
+        consumed_emails = []
 
         if db.DB_TYPE == 'postgresql':
-            # 1. Önce aktif çalışan hesap DIŞINDAKİ boş bir hesabı düş
+            # 1. Önce aktif çalışan hesap DIŞINDAKİ boş hesapları seç
             if active_email:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 AND email != %s LIMIT 1',
-                    (api_key_id, active_email)
+                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 AND email != %s LIMIT %s',
+                    (api_key_id, active_email, amount)
                 )
-                row = cursor.fetchone()
-                if row:
-                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
+                rows = cursor.fetchall()
+                for row in rows:
+                    email_val = row['email'] if isinstance(row, dict) else row[0]
+                    consumed_emails.append(email_val)
             
-            # 2. Eğer başka hesap yoksa (sadece aktif hesap kalmışsa) onu düş
-            if not consumed_email:
+            # 2. Eğer daha fazla kota gerekiyorsa (aktif hesap dahil)
+            remaining_needed = amount - len(consumed_emails)
+            if remaining_needed > 0:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 LIMIT 1',
-                    (api_key_id,)
+                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 LIMIT %s',
+                    (api_key_id, remaining_needed)
                 )
-                row = cursor.fetchone()
-                if row:
-                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
+                rows = cursor.fetchall()
+                for row in rows:
+                    email_val = row['email'] if isinstance(row, dict) else row[0]
+                    if email_val not in consumed_emails:
+                        consumed_emails.append(email_val)
 
-            if consumed_email:
+            if consumed_emails:
                 cursor.execute(
-                    'UPDATE accounts SET used = 1 WHERE api_key_id = %s AND email = %s',
-                    (api_key_id, consumed_email)
+                    'UPDATE accounts SET used = 1 WHERE api_key_id = %s AND email = ANY(%s)',
+                    (api_key_id, consumed_emails)
                 )
                 if task_id:
                     cursor.execute(
                         'UPDATE tasks SET account_email = %s WHERE task_id = %s',
-                        (consumed_email, task_id)
+                        (consumed_emails[0], task_id)
                     )
                 conn.commit()
-                print(f"[QUOTA] Successfully deducted 1 quota ({consumed_email}) for task {task_id}.")
+                print(f"[QUOTA] Successfully deducted {len(consumed_emails)} quota units (requested {amount}) for task {task_id}.")
         else:
             # SQLite versiyonu
             if active_email:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 AND email != ? LIMIT 1',
-                    (api_key_id, active_email)
+                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 AND email != ? LIMIT ?',
+                    (api_key_id, active_email, amount)
                 )
-                row = cursor.fetchone()
-                if row:
-                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
+                rows = cursor.fetchall()
+                for row in rows:
+                    email_val = row['email'] if isinstance(row, dict) else row[0]
+                    consumed_emails.append(email_val)
 
-            if not consumed_email:
+            remaining_needed = amount - len(consumed_emails)
+            if remaining_needed > 0:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 LIMIT 1',
-                    (api_key_id,)
+                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 LIMIT ?',
+                    (api_key_id, remaining_needed)
                 )
-                row = cursor.fetchone()
-                if row:
-                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
+                rows = cursor.fetchall()
+                for row in rows:
+                    email_val = row['email'] if isinstance(row, dict) else row[0]
+                    if email_val not in consumed_emails:
+                        consumed_emails.append(email_val)
 
-            if consumed_email:
+            if consumed_emails:
+                placeholders = ','.join(['?'] * len(consumed_emails))
                 cursor.execute(
-                    'UPDATE accounts SET used = 1 WHERE api_key_id = ? AND email = ?',
-                    (api_key_id, consumed_email)
+                    f'UPDATE accounts SET used = 1 WHERE api_key_id = ? AND email IN ({placeholders})',
+                    [api_key_id] + consumed_emails
                 )
                 if task_id:
                     cursor.execute(
                         'UPDATE tasks SET account_email = ? WHERE task_id = ?',
-                        (consumed_email, task_id)
+                        (consumed_emails[0], task_id)
                     )
                 conn.commit()
-                print(f"[QUOTA] Successfully deducted 1 quota ({consumed_email}) for task {task_id}.")
+                print(f"[QUOTA] Successfully deducted {len(consumed_emails)} quota units (requested {amount}) for task {task_id}.")
         conn.close()
-        return consumed_email
+        return consumed_emails
     except Exception as e:
         print(f"[QUOTA] Error deducting quota: {e}")
         return None
@@ -2095,6 +2107,14 @@ def process_image_task(task_id, params, api_key_id):
         aspect_ratio = params.get('size', '1:1')
         resolution = params.get('resolution', '1K')
         batch_size = int(params.get('batch_size', 1))
+
+        # Determine API quota to deduct for image model
+        model_api_credit = 15
+        for m in AVAILABLE_MODELS.get('image', []):
+            if m.get('id') == raw_model or m.get('id') == model:
+                model_api_credit = m.get('credit', 15)
+                break
+        total_quota_to_deduct = model_api_credit * batch_size
 
         # Handle reference images (Image-to-Image)
         reference_images = []
@@ -2205,7 +2225,7 @@ def process_image_task(task_id, params, api_key_id):
 
             if completed_files:
                 db.update_task_status(task_id, 'completed', make_proxy_url(completed_files[0]))
-                deduct_api_key_quota(api_key_id, task_id)
+                deduct_api_key_quota(api_key_id, task_id, amount=total_quota_to_deduct)
                 post_credits_info = get_member_remaining_credits(current_token)
                 post_credits = post_credits_info.get("total_remain", "?") if post_credits_info else "?"
                 print(f"[RENDER LOG] [IMAGE TASK: {task_id}] [TAMAMLANDI] -> Hesap: {account['email']} | Kalan Kredi: {post_credits}\n")
@@ -2243,6 +2263,13 @@ def process_video_task(task_id, params, api_key_id):
         resolution = params.get('resolution', '720p')
         duration = int(params.get('duration', 8))
         sound = params.get('sound', 'vendor')
+
+        # Determine API quota to deduct for video model
+        model_api_credit = 50
+        for m in AVAILABLE_MODELS.get('video', []):
+            if m.get('id') == raw_model or m.get('id') == model:
+                model_api_credit = m.get('credit', 50)
+                break
 
         input_mode = "TextToVideo"
         source_image_path = None
@@ -2385,10 +2412,10 @@ def process_video_task(task_id, params, api_key_id):
 
             if video_file:
                 db.update_task_status(task_id, 'completed', make_proxy_url(video_file))
-                deduct_api_key_quota(api_key_id, task_id)
+                deduct_api_key_quota(api_key_id, task_id, amount=model_api_credit)
             else:
                 db.update_task_status(task_id, 'completed', make_proxy_url(completed_files[0]) if completed_files else "")
-                deduct_api_key_quota(api_key_id, task_id)
+                deduct_api_key_quota(api_key_id, task_id, amount=model_api_credit)
             post_credits_info = get_member_remaining_credits(current_token)
             post_credits = post_credits_info.get("total_remain", "?") if post_credits_info else "?"
             print(f"[RENDER LOG] [VIDEO TASK: {task_id}] [TAMAMLANDI] -> Hesap: {account['email']} | Kalan Kredi: {post_credits}\n")
