@@ -2369,6 +2369,34 @@ def process_video_task(task_id, params, api_key_id):
                 })
                 db.update_task_token(task_id, token_data)
 
+                # If Sora 2 is invoked without a start frame, auto-generate initial frame from prompt
+                current_source_image_path = source_image_path
+                current_input_mode = input_mode
+                if model == "sora_2_std" and current_input_mode == "TextToVideo" and not current_source_image_path:
+                    try:
+                        print(f"[SORA-2] Auto-generating initial frame for Text-to-Video task {task_id}...")
+                        t2i_res = generate_ai_image_service(
+                            member_token=member_token,
+                            user_prompt=prompt,
+                            model_key="NANO_BANANA_2",
+                            aspect_ratio=aspect_ratio,
+                            resolution="1K",
+                            batch_size="1",
+                            task_id=task_id
+                        )
+                        if t2i_res and t2i_res.get("status") == "Done" and t2i_res.get("files"):
+                            img_url = t2i_res["files"][0]
+                            img_resp = requests.get(img_url, timeout=30)
+                            if img_resp.status_code == 200:
+                                temp_auto_img = os.path.join(tempfile.gettempdir(), f"sora_auto_{task_id}.jpg")
+                                with open(temp_auto_img, "wb") as f:
+                                    f.write(img_resp.content)
+                                temp_files.append(temp_auto_img)
+                                current_source_image_path = temp_auto_img
+                                current_input_mode = "ImageToVideo"
+                    except Exception as ex:
+                        print(f"[SORA-2] Auto-frame generation error: {ex}")
+
                 result = generate_ai_video_service(
                     member_token=member_token,
                     user_prompt=prompt,
@@ -2377,8 +2405,8 @@ def process_video_task(task_id, params, api_key_id):
                     resolution=resolution,
                     processing_duration=duration,
                     sound=sound,
-                    effect_mode=input_mode,
-                    source_image_path=source_image_path,
+                    effect_mode=current_input_mode,
+                    source_image_path=current_source_image_path,
                     last_image_path=last_image_path,
                     ref_images=ref_images if ref_images else None,
                     ref_videos=ref_videos if ref_videos else None,
