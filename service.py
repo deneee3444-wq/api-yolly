@@ -943,6 +943,10 @@ def get_subscription_token(member_token: str) -> str:
         "timestamp": ts_ms,
     }
     resp = requests.post(SUB_AUTH_URL, json=body, headers=headers, timeout=30)
+    if resp.status_code == 401:
+        raise AuthExpiredError(f"Auth token expired on subscriptions/auth: {resp.text}")
+    if resp.status_code == 403:
+        raise CreditExhaustedError(f"Subscription auth forbidden/exhausted: {resp.text}")
     resp.raise_for_status()
     return resp.json()["subscription_token"]
 
@@ -2184,20 +2188,32 @@ def process_image_task(task_id, params, api_key_id):
                 last_error = e
                 continue
 
-            except AuthExpiredError as e:
-                print(f"[RETRY] Auth token expired for account {account['email']}. Re-logging in...")
-                login_res = login(account['email'], account['password'])
-                if login_res.get("status") == "SUCCESS" and "info" in login_res:
-                    refreshed_token = login_res["info"].get("memberToken")
-                    if refreshed_token:
-                        with ACCOUNT_LOCK:
-                            if api_key_id in ACTIVE_ACCOUNTS:
-                                ACTIVE_ACCOUNTS[api_key_id]["member_token"] = refreshed_token
-                        last_error = e
-                        continue
-                mark_account_exhausted(api_key_id, account['email'])
+            except (AuthExpiredError, requests.exceptions.HTTPError, Exception) as e:
+                is_401 = isinstance(e, AuthExpiredError) or "401" in str(e) or (hasattr(e, 'response') and e.response is not None and e.response.status_code == 401)
+                is_403 = isinstance(e, CreditExhaustedError) or "403" in str(e) or "Fail to verify credit" in str(e) or (hasattr(e, 'response') and e.response is not None and e.response.status_code == 403)
+                if is_403:
+                    print(f"[RETRY] 403 Credit exhausted for account {account['email']} on image task {task_id}: {e}. Rotating to new account...")
+                    mark_account_exhausted(api_key_id, account['email'])
+                    last_error = e
+                    continue
+                if is_401:
+                    print(f"[RETRY] Auth token expired (401) for account {account['email']}. Re-logging in...")
+                    login_res = login(account['email'], account['password'])
+                    if login_res.get("status") == "SUCCESS" and "info" in login_res:
+                        refreshed_token = login_res["info"].get("memberToken")
+                        if refreshed_token:
+                            with ACCOUNT_LOCK:
+                                if api_key_id in ACTIVE_ACCOUNTS:
+                                    ACTIVE_ACCOUNTS[api_key_id]["member_token"] = refreshed_token
+                            last_error = e
+                            continue
+                    print(f"[RETRY] Re-login failed for account {account['email']}. Rotating to fresh account...")
+                    mark_account_exhausted(api_key_id, account['email'])
+                    last_error = e
+                    continue
+                # For any other unhandled exception in the loop
                 last_error = e
-                continue
+                break
 
         if not result:
             db.update_task_status(task_id, 'failed')
@@ -2370,20 +2386,32 @@ def process_video_task(task_id, params, api_key_id):
                 last_error = e
                 continue
 
-            except AuthExpiredError as e:
-                print(f"[RETRY] Auth token expired for account {account['email']}. Re-logging in...")
-                login_res = login(account['email'], account['password'])
-                if login_res.get("status") == "SUCCESS" and "info" in login_res:
-                    refreshed_token = login_res["info"].get("memberToken")
-                    if refreshed_token:
-                        with ACCOUNT_LOCK:
-                            if api_key_id in ACTIVE_ACCOUNTS:
-                                ACTIVE_ACCOUNTS[api_key_id]["member_token"] = refreshed_token
-                        last_error = e
-                        continue
-                mark_account_exhausted(api_key_id, account['email'])
+            except (AuthExpiredError, requests.exceptions.HTTPError, Exception) as e:
+                is_401 = isinstance(e, AuthExpiredError) or "401" in str(e) or (hasattr(e, 'response') and e.response is not None and e.response.status_code == 401)
+                is_403 = isinstance(e, CreditExhaustedError) or "403" in str(e) or "Fail to verify credit" in str(e) or (hasattr(e, 'response') and e.response is not None and e.response.status_code == 403)
+                if is_403:
+                    print(f"[RETRY] 403 Credit exhausted for account {account['email']} on video task {task_id}: {e}. Rotating to new account...")
+                    mark_account_exhausted(api_key_id, account['email'])
+                    last_error = e
+                    continue
+                if is_401:
+                    print(f"[RETRY] Auth token expired (401) for account {account['email']}. Re-logging in...")
+                    login_res = login(account['email'], account['password'])
+                    if login_res.get("status") == "SUCCESS" and "info" in login_res:
+                        refreshed_token = login_res["info"].get("memberToken")
+                        if refreshed_token:
+                            with ACCOUNT_LOCK:
+                                if api_key_id in ACTIVE_ACCOUNTS:
+                                    ACTIVE_ACCOUNTS[api_key_id]["member_token"] = refreshed_token
+                            last_error = e
+                            continue
+                    print(f"[RETRY] Re-login failed for account {account['email']}. Rotating to fresh account...")
+                    mark_account_exhausted(api_key_id, account['email'])
+                    last_error = e
+                    continue
+                # For any other unhandled exception in the loop
                 last_error = e
-                continue
+                break
 
         if not result:
             db.update_task_status(task_id, 'failed')
