@@ -115,7 +115,7 @@ IMAGE_MODELS_CONFIG = {
         "vendor": "Google",
         "actionId_prefix": "genimage_1_img_google_gemini3.1flash",
         "promptLength": 2500,
-        "ref_img_limit": 5,
+        "ref_img_limit": 14,
         "supported_resolutions": ["1K", "2K", "4K"],
         "supported_aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
         "credits": {
@@ -129,7 +129,7 @@ IMAGE_MODELS_CONFIG = {
         "vendor": "Google",
         "actionId_prefix": "genimage_1_img_google_gemini3pro",
         "promptLength": 2500,
-        "ref_img_limit": 5,
+        "ref_img_limit": 14,
         "supported_resolutions": ["1K", "2K", "4K"],
         "supported_aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
         "credits": {
@@ -143,7 +143,7 @@ IMAGE_MODELS_CONFIG = {
         "vendor": "OpenAI",
         "actionId_prefix": "genimage_1_img_openai_gptimage2",
         "promptLength": 8000,
-        "ref_img_limit": 5,
+        "ref_img_limit": 16,
         "supported_resolutions": ["1K", "2K"],
         "supported_aspect_ratios": ["1:1", "16:9", "9:16", "4:3", "3:4"],
         "credits": {
@@ -181,154 +181,57 @@ IMAGE_MODELS_CONFIG["GPT_IMAGE_2"] = IMAGE_MODELS_CONFIG["gpt_image_2"]
 # VIDEO MODEL CONFIGURATIONS
 # ==============================================================================
 VIDEO_MODELS_CONFIG = {
-    "sora_2_std": {
-        "name": "Sora 2",
-        "model": "sora-2",
-        "vendor": "OpenAI",
-        "supported_modes": ["ImageToVideo"],
-        "supported_frame_modes": ["single"],
-        "supported_resolutions": ["720p"],
-        "supported_aspect_ratios": ["16:9", "9:16"],
-        "supported_durations": [8],
-        "action_id": "genvideo_1_sec_openai_sora2_{sound}_720p",
-        "action_id_i2v": "genvideo_1_sec_openai_custom_sora2std_{sound}_{frame_mode}",
-        "credit_map": {
-            ("none", "720p"): 6,
-            ("vendor", "720p"): 6,
-        },
-        "credit": 6,
-        "mode": "std",
-        "default_sound": "vendor",
-    },
-    "seedance_2_0_mini": {
-        "name": "Seedance 2.0",
-        "model": "dreamina-seedance-2-0-mini-260615",
-        "vendor": "BytePlus",
-        "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
-        "supported_frame_modes": ["single", "startend"],
-        "supported_resolutions": ["720p"],
-        "supported_aspect_ratios": ["16:9", "9:16", "1:1"],
-        "supported_durations": [10],
-        "supported_resolutions_by_mode": {
-            "ImageToVideo": ["720p"],
-            "TextToVideo": ["720p"],
-            "ReferenceToVideo": ["720p"],
-        },
-        "supported_durations_by_mode": {
-            "ImageToVideo": [10],
-            "TextToVideo": [10],
-            "ReferenceToVideo": [10],
-        },
-        "action_id": "genvideo_1_sec_bytedance_seedance2.0mini_{sound}_{resolution}",
-        "action_id_i2v": "genvideo_1_sec_bytedance_custom_seedance2.0mini_{sound}_{frame_mode}_{resolution}",
-        "credit_map": {
-            ("none", "720p"): 4,
-            ("vendor", "720p"): 4,
-        },
-        "credit": 2,
-        "mode": "mini",
-        "reference_media_limit": {
-            "supported_types": ["image"],
-            "max_images": 5,
-            "max_videos": 0,
-            "max_total": 5,
-        },
-    },
-    "gemini_omni_flash": {
-        "name": "Gemini Omni Flash",
-        "model": "gemini-omni-flash-preview",
+    "veo_3_1_lite": {
+        "name": "Veo 3.1 Lite",
+        "model": "veo-3.1-lite-generate-001",
         "vendor": "Google",
-        "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
-        "supported_frame_modes": ["single"],
-        "supported_resolutions": ["720p"],
-        "supported_aspect_ratios": ["16:9", "9:16"],
-        "supported_durations": [10],
-        "action_id": "genvideo_1_sec_google_geminiomniflash_{sound}_{resolution}",
-        "action_id_i2v": "genvideo_1_sec_google_custom_geminiomniflash_{sound}_{frame_mode}_{resolution}",
-        "credit_map": {
-            ("none", "720p"): 5,
-            ("vendor", "720p"): 5,
-        },
-        "credit": 5,
-        "mode": "std",
-        "default_sound": "vendor",
-        "reference_media_limit": {
-            "supported_types": ["image"],
-            "max_images": 5,
-            "max_videos": 0,
-            "max_total": 5,
-        },
-    },
-    "kling_o3": {
-        "name": "Kling 3.0",
-        "model": "kling-v3-omni",
-        "vendor": "Kling",
-        "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"],
+        "supported_modes": ["TextToVideo", "ImageToVideo"],
         "supported_frame_modes": ["single", "startend"],
-        "supported_resolutions": ["720p"],
-        "supported_aspect_ratios": ["16:9", "9:16", "1:1"],
-        "supported_durations": [10],
+        "supported_resolutions": ["1080p"],
+        "supported_aspect_ratios": ["16:9", "9:16"],
+        "supported_durations": [4, 6, 8],
         "supported_resolutions_by_mode": {
-            "ImageToVideo": ["720p"],
-            "TextToVideo": ["720p"],
-            "ReferenceToVideo": ["720p"],
+            "ImageToVideo": ["1080p"],
+            "TextToVideo": ["720p", "1080p"],
         },
         "supported_durations_by_mode": {
-            "ImageToVideo": [10],
-            "TextToVideo": [10],
-            "ReferenceToVideo": [10],
+            "ImageToVideo": [4, 6, 8],
+            "TextToVideo": [4, 8],
         },
-        "action_id": "genvideo_1_sec_kling_o3std_{sound}_720p",
-        "action_id_overrides": {
-            "720p": "genvideo_1_sec_kling_o3std_{sound}_720p",
-        },
-        "action_id_i2v_overrides": {
-            "720p": "genvideo_1_sec_kling_custom_o3std_{sound}_{frame_mode}_720p",
-        },
+        "action_id": "genvideo_1_sec_google_veo3.1lite_{sound}_{resolution}",
+        "action_id_i2v": "genvideo_1_sec_google_custom_veo3.1lite_{sound}_{frame_mode}_{resolution}",
         "credit_map": {
-            ("none", "720p"): 4,
-            ("vendor", "720p"): 5,
+            ("ImageToVideo", "none", "720p"): 3,
+            ("ImageToVideo", "none", "1080p"): 5,
+            ("ImageToVideo", "vendor", "720p"): 3,
+            ("ImageToVideo", "vendor", "1080p"): 5,
+            ("TextToVideo", "none", "720p"): 2,
+            ("TextToVideo", "none", "1080p"): 3,
+            ("TextToVideo", "vendor", "720p"): 3,
+            ("TextToVideo", "vendor", "1080p"): 5,
+            ("none", "720p"): 2,
+            ("none", "1080p"): 3,
+            ("vendor", "720p"): 3,
+            ("vendor", "1080p"): 5,
         },
-        "credit": 5,
+        "credit": 3,
         "mode": "std",
-        "reference_media_limit": {
-            "supported_types": ["image"],
-            "max_images": 5,
-            "max_videos": 0,
-            "max_total": 5,
-        },
-    },
+    }
 }
 
 # Video Model ID Mapping (Frontend / API ID -> Backend Model ID)
 VIDEO_MODEL_MAPPING = {
-    "sora_2_std": "sora_2_std",
-    "SORA_2_STD": "sora_2_std",
-    "SORA_2": "sora_2_std",
-    "sora_2": "sora_2_std",
-    "sora-2": "sora_2_std",
-    "seedance_2_0_mini": "seedance_2_0_mini",
-    "SEEDANCE_2_0_MINI": "seedance_2_0_mini",
-    "SEEDANCE_MINI": "seedance_2_0_mini",
-    "seedance_mini": "seedance_2_0_mini",
-    "seedance": "seedance_2_0_mini",
-    "gemini_omni_flash": "gemini_omni_flash",
-    "GEMINI_OMNI_FLASH": "gemini_omni_flash",
-    "gemini_omni": "gemini_omni_flash",
-    "GEMINI_OMNI": "gemini_omni_flash",
-    "kling_o3": "kling_o3",
-    "KLING_O3": "kling_o3",
-    "kling3": "kling_o3",
-    "kling_3": "kling_o3",
+    "VEO_3_1": "veo_3_1_lite",
+    "GROK_VIDEO": "veo_3_1_lite",
+    # Fallback / case-insensitive aliases
+    "veo_3_1_lite": "veo_3_1_lite",
+    "veo_3_1": "veo_3_1_lite",
+    "grok_video": "veo_3_1_lite",
 }
 
 # Direct mapping in VIDEO_MODELS_CONFIG for safety
-VIDEO_MODELS_CONFIG["SORA_2_STD"] = VIDEO_MODELS_CONFIG["sora_2_std"]
-VIDEO_MODELS_CONFIG["SORA_2"] = VIDEO_MODELS_CONFIG["sora_2_std"]
-VIDEO_MODELS_CONFIG["SEEDANCE_2_0_MINI"] = VIDEO_MODELS_CONFIG["seedance_2_0_mini"]
-VIDEO_MODELS_CONFIG["SEEDANCE_MINI"] = VIDEO_MODELS_CONFIG["seedance_2_0_mini"]
-VIDEO_MODELS_CONFIG["GEMINI_OMNI_FLASH"] = VIDEO_MODELS_CONFIG["gemini_omni_flash"]
-VIDEO_MODELS_CONFIG["KLING_O3"] = VIDEO_MODELS_CONFIG["kling_o3"]
+VIDEO_MODELS_CONFIG["VEO_3_1"] = VIDEO_MODELS_CONFIG["veo_3_1_lite"]
+VIDEO_MODELS_CONFIG["GROK_VIDEO"] = VIDEO_MODELS_CONFIG["veo_3_1_lite"]
 
 MODELS = {} # Compatibility mapping
 
@@ -344,56 +247,68 @@ AVAILABLE_MODELS = {
             "supported_resolutions": ["1K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 2500,
-            "credit": 15
+            "max_prompt_length": 2500
         },
         {
             "id": "NANO_BANANA_2",
             "name": "Nano Banana 2",
-            "description": "Nano Banana 2 by Google - Supports up to 5 Reference Images",
+            "description": "Nano Banana 2 by Google - Supports up to 14 Reference Images",
             "supports_reference_images": True,
             "max_reference_images": 5,
             "supported_sizes": ["1:1", "16:9", "9:16", "4:3", "3:4"],
             "supported_resolutions": ["1K", "2K", "4K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 2500,
-            "credit": 15
+            "max_prompt_length": 2500
         },
         {
             "id": "NANO_BANANA_PRO",
             "name": "Nano Banana Pro",
-            "description": "Nano Banana Pro by Google - Supports up to 5 Reference Images",
+            "description": "Nano Banana Pro by Google - Supports up to 14 Reference Images",
             "supports_reference_images": True,
             "max_reference_images": 5,
             "supported_sizes": ["1:1", "16:9", "9:16", "4:3", "3:4"],
             "supported_resolutions": ["1K", "2K", "4K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 2500,
-            "credit": 15
+            "max_prompt_length": 2500
         },
         {
             "id": "GPT_IMAGE_2",
             "name": "GPT-Image-2",
-            "description": "GPT-Image-2 by OpenAI - Supports up to 5 Reference Images",
+            "description": "GPT-Image-2 by OpenAI - Supports up to 16 Reference Images",
             "supports_reference_images": True,
             "max_reference_images": 5,
             "supported_sizes": ["1:1", "16:9", "9:16", "4:3", "3:4"],
             "supported_resolutions": ["1K", "2K"],
             "default_size": "1:1",
             "default_resolution": "1K",
-            "max_prompt_length": 8000,
-            "credit": 15
+            "max_prompt_length": 8000
         }
     ],
     "video": [
         {
-            "id": "sora_2_std",
-            "name": "Sora 2",
-            "description": "Sora 2 by OpenAI - Supports Start Frame",
+            "id": "VEO_3_1",
+            "name": "Veo 3.1",
+            "description": "Veo 3.1 - Supports Start/End Frame",
             "supports_start_frame": True,
-            "supports_end_frame": False,
+            "supports_end_frame": True,
+            "supports_reference_images": False,
+            "max_reference_images": 0,
+            "supported_sizes": ["16:9", "9:16"],
+            "supported_durations": [4, 6, 8],
+            "supported_resolutions": ["720p", "1080p"],
+            "default_size": "16:9",
+            "default_resolution": "1080p",
+            "default_duration": 4,
+            "max_prompt_length": 4000
+        },
+        {
+            "id": "GROK_VIDEO",
+            "name": "Grok Video",
+            "description": "Grok Video - Supports Start/End Frame",
+            "supports_start_frame": True,
+            "supports_end_frame": True,
             "supports_reference_images": False,
             "max_reference_images": 0,
             "supported_sizes": ["16:9", "9:16"],
@@ -402,65 +317,7 @@ AVAILABLE_MODELS = {
             "default_size": "16:9",
             "default_resolution": "720p",
             "default_duration": 8,
-            "max_prompt_length": 2000,
-            "credit": 50,
-            "supported_modes": ["ImageToVideo"],
-            "supported_frame_modes": ["single"],
-            "requires_start_frame": True
-        },
-        {
-            "id": "seedance_2_0_mini",
-            "name": "Seedance 2.0",
-            "description": "Seedance 2.0 by BytePlus - Supports Start/End Frame, up to 5 Reference Images",
-            "supports_start_frame": True,
-            "supports_end_frame": True,
-            "supports_reference_images": True,
-            "max_reference_images": 5,
-            "supported_sizes": ["16:9", "9:16", "1:1"],
-            "supported_durations": [10],
-            "supported_resolutions": ["720p"],
-            "default_size": "16:9",
-            "default_resolution": "720p",
-            "default_duration": 10,
-            "max_prompt_length": 4900,
-            "credit": 50,
-            "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"]
-        },
-        {
-            "id": "gemini_omni_flash",
-            "name": "Gemini Omni Flash",
-            "description": "Gemini Omni Flash by Google - Supports Start Frame, up to 5 Reference Images",
-            "supports_start_frame": True,
-            "supports_end_frame": False,
-            "supports_reference_images": True,
-            "max_reference_images": 5,
-            "supported_sizes": ["16:9", "9:16"],
-            "supported_durations": [10],
-            "supported_resolutions": ["720p"],
-            "default_size": "16:9",
-            "default_resolution": "720p",
-            "default_duration": 10,
-            "max_prompt_length": 3500,
-            "credit": 55,
-            "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"]
-        },
-        {
-            "id": "kling_o3",
-            "name": "Kling 3.0",
-            "description": "Kling 3.0 by Kling - Supports Start/End Frame, up to 5 Reference Images",
-            "supports_start_frame": True,
-            "supports_end_frame": True,
-            "supports_reference_images": True,
-            "max_reference_images": 5,
-            "supported_sizes": ["16:9", "9:16", "1:1"],
-            "supported_durations": [10],
-            "supported_resolutions": ["720p"],
-            "default_size": "16:9",
-            "default_resolution": "720p",
-            "default_duration": 10,
-            "max_prompt_length": 2500,
-            "credit": 55,
-            "supported_modes": ["TextToVideo", "ImageToVideo", "ReferenceToVideo"]
+            "max_prompt_length": 4000
         }
     ],
     "tts": [],
@@ -1381,10 +1238,10 @@ def generate_ai_image_service(
 def generate_ai_video_service(
     member_token: str,
     user_prompt: str = "a cute astronaut cat floating in space station, cinematic lighting",
-    model_key: str = "sora_2_std",
+    model_key: str = "VEO_3_1",
     aspect_ratio: str = "16:9",
-    resolution: str = "720p",
-    processing_duration: int = 8,
+    resolution: str = "1080p",
+    processing_duration: int = 4,
     sound: str = "none",
     effect_mode: str = "TextToVideo",
     source_image_path: str = None,
@@ -1396,7 +1253,7 @@ def generate_ai_video_service(
     task_id: str = None,
 ):
     actual_model_key = VIDEO_MODEL_MAPPING.get(model_key, model_key)
-    model_data = VIDEO_MODELS_CONFIG.get(actual_model_key, VIDEO_MODELS_CONFIG.get("sora_2_std"))
+    model_data = VIDEO_MODELS_CONFIG.get(actual_model_key, VIDEO_MODELS_CONFIG.get("veo_3_1_lite"))
     if isinstance(model_data["model"], dict):
         model_name_str = model_data["model"].get(effect_mode, list(model_data["model"].values())[0])
     else:
@@ -1995,98 +1852,86 @@ def get_or_create_active_account(api_key_id, task_id=None, force_new=False):
 
     return None, None
 
-def deduct_api_key_quota(api_key_id, task_id=None, amount=1):
-    """Deducts `amount` (e.g. 15 for images, 50/55 for videos) accounts/quotas from the API key's available accounts upon successful task completion.
+def deduct_api_key_quota(api_key_id, task_id=None):
+    """Deducts 1 account/quota from the API key's available accounts upon successful task completion.
     Prioritizes accounts other than the currently active working account so the active account remains intact in DB.
     Even if the active account's DB row is consumed, its in-memory session (ACTIVE_ACCOUNTS) stays fully operational.
     """
     try:
-        if amount is None or amount <= 0:
-            amount = 1
-
         active_acc = ACTIVE_ACCOUNTS.get(api_key_id)
         active_email = active_acc.get("email") if active_acc else None
 
         conn = db.get_connection()
         cursor = conn.cursor()
-        consumed_emails = []
+        consumed_email = None
 
         if db.DB_TYPE == 'postgresql':
-            # 1. Önce aktif çalışan hesap DIŞINDAKİ boş hesapları seç
+            # 1. Önce aktif çalışan hesap DIŞINDAKİ boş bir hesabı düş
             if active_email:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 AND email != %s LIMIT %s',
-                    (api_key_id, active_email, amount)
+                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 AND email != %s LIMIT 1',
+                    (api_key_id, active_email)
                 )
-                rows = cursor.fetchall()
-                for row in rows:
-                    email_val = row['email'] if isinstance(row, dict) else row[0]
-                    consumed_emails.append(email_val)
+                row = cursor.fetchone()
+                if row:
+                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
             
-            # 2. Eğer daha fazla kota gerekiyorsa (aktif hesap dahil)
-            remaining_needed = amount - len(consumed_emails)
-            if remaining_needed > 0:
+            # 2. Eğer başka hesap yoksa (sadece aktif hesap kalmışsa) onu düş
+            if not consumed_email:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 LIMIT %s',
-                    (api_key_id, remaining_needed)
+                    'SELECT email FROM accounts WHERE api_key_id = %s AND used = 0 LIMIT 1',
+                    (api_key_id,)
                 )
-                rows = cursor.fetchall()
-                for row in rows:
-                    email_val = row['email'] if isinstance(row, dict) else row[0]
-                    if email_val not in consumed_emails:
-                        consumed_emails.append(email_val)
+                row = cursor.fetchone()
+                if row:
+                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
 
-            if consumed_emails:
+            if consumed_email:
                 cursor.execute(
-                    'UPDATE accounts SET used = 1 WHERE api_key_id = %s AND email = ANY(%s)',
-                    (api_key_id, consumed_emails)
+                    'UPDATE accounts SET used = 1 WHERE api_key_id = %s AND email = %s',
+                    (api_key_id, consumed_email)
                 )
                 if task_id:
                     cursor.execute(
                         'UPDATE tasks SET account_email = %s WHERE task_id = %s',
-                        (consumed_emails[0], task_id)
+                        (consumed_email, task_id)
                     )
                 conn.commit()
-                print(f"[QUOTA] Successfully deducted {len(consumed_emails)} quota units (requested {amount}) for task {task_id}.")
+                print(f"[QUOTA] Successfully deducted 1 quota ({consumed_email}) for task {task_id}.")
         else:
             # SQLite versiyonu
             if active_email:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 AND email != ? LIMIT ?',
-                    (api_key_id, active_email, amount)
+                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 AND email != ? LIMIT 1',
+                    (api_key_id, active_email)
                 )
-                rows = cursor.fetchall()
-                for row in rows:
-                    email_val = row['email'] if isinstance(row, dict) else row[0]
-                    consumed_emails.append(email_val)
+                row = cursor.fetchone()
+                if row:
+                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
 
-            remaining_needed = amount - len(consumed_emails)
-            if remaining_needed > 0:
+            if not consumed_email:
                 cursor.execute(
-                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 LIMIT ?',
-                    (api_key_id, remaining_needed)
+                    'SELECT email FROM accounts WHERE api_key_id = ? AND used = 0 LIMIT 1',
+                    (api_key_id,)
                 )
-                rows = cursor.fetchall()
-                for row in rows:
-                    email_val = row['email'] if isinstance(row, dict) else row[0]
-                    if email_val not in consumed_emails:
-                        consumed_emails.append(email_val)
+                row = cursor.fetchone()
+                if row:
+                    consumed_email = row['email'] if isinstance(row, dict) else row[0]
 
-            if consumed_emails:
-                placeholders = ','.join(['?'] * len(consumed_emails))
+            if consumed_email:
                 cursor.execute(
-                    f'UPDATE accounts SET used = 1 WHERE api_key_id = ? AND email IN ({placeholders})',
-                    [api_key_id] + consumed_emails
+                    'UPDATE accounts SET used = 1 WHERE api_key_id = ? AND email = ?',
+                    (api_key_id, consumed_email)
                 )
                 if task_id:
                     cursor.execute(
                         'UPDATE tasks SET account_email = ? WHERE task_id = ?',
-                        (consumed_emails[0], task_id)
+                        (consumed_email, task_id)
                     )
                 conn.commit()
-                print(f"[QUOTA] Successfully deducted {len(consumed_emails)} quota units (requested {amount}) for task {task_id}.")
+                print(f"[QUOTA] Successfully deducted 1 quota ({consumed_email}) for task {task_id}.")
         conn.close()
-        return consumed_emails
+        return consumed_email
     except Exception as e:
         print(f"[QUOTA] Error deducting quota: {e}")
         return None
@@ -2117,14 +1962,6 @@ def process_image_task(task_id, params, api_key_id):
         aspect_ratio = params.get('size', '1:1')
         resolution = params.get('resolution', '1K')
         batch_size = int(params.get('batch_size', 1))
-
-        # Determine API quota to deduct for image model
-        model_api_credit = 15
-        for m in AVAILABLE_MODELS.get('image', []):
-            if m.get('id') == raw_model or m.get('id') == model:
-                model_api_credit = m.get('credit', 15)
-                break
-        total_quota_to_deduct = model_api_credit * batch_size
 
         # Handle reference images (Image-to-Image)
         reference_images = []
@@ -2247,7 +2084,7 @@ def process_image_task(task_id, params, api_key_id):
 
             if completed_files:
                 db.update_task_status(task_id, 'completed', make_proxy_url(completed_files[0]))
-                deduct_api_key_quota(api_key_id, task_id, amount=total_quota_to_deduct)
+                deduct_api_key_quota(api_key_id, task_id)
                 post_credits_info = get_member_remaining_credits(current_token)
                 post_credits = post_credits_info.get("total_remain", "?") if post_credits_info else "?"
                 print(f"[RENDER LOG] [IMAGE TASK: {task_id}] [TAMAMLANDI] -> Hesap: {account['email']} | Kalan Kredi: {post_credits}\n")
@@ -2279,21 +2116,12 @@ def process_video_task(task_id, params, api_key_id):
         db.update_task_status(task_id, 'running')
 
         prompt = params.get('prompt', '')
-        has_start_frame = bool(params.get('start_frame'))
-        default_model = 'sora_2_std' if has_start_frame else 'seedance_2_0_mini'
-        raw_model = params.get('model') or default_model
+        raw_model = params.get('model', 'VEO_3_1')
         model = VIDEO_MODEL_MAPPING.get(raw_model, raw_model)
         aspect_ratio = params.get('size', '16:9')
-        resolution = params.get('resolution', '720p')
-        duration = int(params.get('duration', 8 if model == 'sora_2_std' else 10))
+        resolution = params.get('resolution', '1080p')
+        duration = int(params.get('duration', 4))
         sound = params.get('sound', 'vendor')
-
-        # Determine API quota to deduct for video model
-        model_api_credit = 50
-        for m in AVAILABLE_MODELS.get('video', []):
-            if m.get('id') == raw_model or m.get('id') == model:
-                model_api_credit = m.get('credit', 50)
-                break
 
         input_mode = "TextToVideo"
         source_image_path = None
@@ -2369,34 +2197,6 @@ def process_video_task(task_id, params, api_key_id):
                 })
                 db.update_task_token(task_id, token_data)
 
-                # If Sora 2 is invoked without a start frame, auto-generate initial frame from prompt
-                current_source_image_path = source_image_path
-                current_input_mode = input_mode
-                if model == "sora_2_std" and current_input_mode == "TextToVideo" and not current_source_image_path:
-                    try:
-                        print(f"[SORA-2] Auto-generating initial frame for Text-to-Video task {task_id}...")
-                        t2i_res = generate_ai_image_service(
-                            member_token=member_token,
-                            user_prompt=prompt,
-                            model_key="NANO_BANANA_2",
-                            aspect_ratio=aspect_ratio,
-                            resolution="1K",
-                            batch_size="1",
-                            task_id=task_id
-                        )
-                        if t2i_res and t2i_res.get("status") == "Done" and t2i_res.get("files"):
-                            img_url = t2i_res["files"][0]
-                            img_resp = requests.get(img_url, timeout=30)
-                            if img_resp.status_code == 200:
-                                temp_auto_img = os.path.join(tempfile.gettempdir(), f"sora_auto_{task_id}.jpg")
-                                with open(temp_auto_img, "wb") as f:
-                                    f.write(img_resp.content)
-                                temp_files.append(temp_auto_img)
-                                current_source_image_path = temp_auto_img
-                                current_input_mode = "ImageToVideo"
-                    except Exception as ex:
-                        print(f"[SORA-2] Auto-frame generation error: {ex}")
-
                 result = generate_ai_video_service(
                     member_token=member_token,
                     user_prompt=prompt,
@@ -2405,8 +2205,8 @@ def process_video_task(task_id, params, api_key_id):
                     resolution=resolution,
                     processing_duration=duration,
                     sound=sound,
-                    effect_mode=current_input_mode,
-                    source_image_path=current_source_image_path,
+                    effect_mode=input_mode,
+                    source_image_path=source_image_path,
                     last_image_path=last_image_path,
                     ref_images=ref_images if ref_images else None,
                     ref_videos=ref_videos if ref_videos else None,
@@ -2476,10 +2276,10 @@ def process_video_task(task_id, params, api_key_id):
 
             if video_file:
                 db.update_task_status(task_id, 'completed', make_proxy_url(video_file))
-                deduct_api_key_quota(api_key_id, task_id, amount=model_api_credit)
+                deduct_api_key_quota(api_key_id, task_id)
             else:
                 db.update_task_status(task_id, 'completed', make_proxy_url(completed_files[0]) if completed_files else "")
-                deduct_api_key_quota(api_key_id, task_id, amount=model_api_credit)
+                deduct_api_key_quota(api_key_id, task_id)
             post_credits_info = get_member_remaining_credits(current_token)
             post_credits = post_credits_info.get("total_remain", "?") if post_credits_info else "?"
             print(f"[RENDER LOG] [VIDEO TASK: {task_id}] [TAMAMLANDI] -> Hesap: {account['email']} | Kalan Kredi: {post_credits}\n")
